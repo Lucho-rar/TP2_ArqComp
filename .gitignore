@@ -1,0 +1,17 @@
+# Verilog
+*.vcd
+*.vpd
+*.fdb_latexmk
+*.fdb
+*.fls
+*.synopsys
+*.xilinx
+# VSCode
+.vscode/
+.history/
+*.code-workspace
+TP1_ALU.sim/sim_1/impl/timing/xsim/simulate.log
+TP1_ALU.cache/
+TP1_ALU.hw/
+TP1_ALU.runs/
+TP1_ALU.xpr
