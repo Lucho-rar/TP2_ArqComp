@@ -10,8 +10,8 @@
 .vscode/
 .history/
 *.code-workspace
-TP1_ALU.sim/sim_1/impl/timing/xsim/simulate.log
-TP1_ALU.cache/
-TP1_ALU.hw/
-TP1_ALU.runs/
-TP1_ALU.xpr
+TP2_ArqComp.sim/sim_1/impl/timing/xsim/simulate.log
+TP2_ArqComp.cache/
+TP2_ArqComp.hw/
+TP2_ArqComp.runs/
+TP2_ArqComp.xpr
