@@ -96,5 +96,3 @@ module interface#(
     assign o_tx_start = tx_start_reg;
     
 endmodule
-
-    

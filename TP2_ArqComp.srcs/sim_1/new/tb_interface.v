@@ -5,13 +5,13 @@ module tb_interface();
     // Parámetros
     //parameter F_CLOCK  = 50E6;  // RELOJ
     //parameter BAUD_RATE = 9600; // BAUDIOS
-    parameter DBIT = 8;         // BITS DE DATOS
-    parameter NB_OP = 6;        // BITS DE OPERACION
+    localparam DBIT = 8;         // BITS DE DATOS
+    localparam NB_OP = 6;        // BITS DE OPERACION
 
     reg clk, reset;         // Input clock y reset
     reg rx_done   ;           //  este es el done del receptor del modulo uart
     reg [DBIT-1:0] rx_data ;      // este es el dato que sale del receptor del modulo uart
-    reg [DBIT-1:0] alu_data   ;    // esta es la entrada de datos del modulo alu
+    wire [DBIT-1:0] alu_data   ;    // esta es la entrada de datos del modulo alu
 
     wire [DBIT-1:0] data_a, data_b,  data_out;     //datos para la alu
     wire [NB_OP-1:0] data_op;
