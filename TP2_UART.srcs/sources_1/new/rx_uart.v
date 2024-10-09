@@ -98,3 +98,4 @@ module rx_uart
     assign o_dout = data_out;
 
 endmodule
+
