@@ -36,6 +36,7 @@ module tb_tx_uart();
         #104320
         wait ( tx_done == 1) ;
         
+        #50
         reset = 1;
         
         #50;

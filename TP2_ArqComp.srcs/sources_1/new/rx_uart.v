@@ -4,6 +4,7 @@ module rx_uart
 #(
     parameter DBIT = 8,                 // Data bits
     parameter SB_TICK = 16              // Ticks for stop bits, 16 -> 1 stop bit
+)
 (
     input wire i_clk, i_reset,          // Input clock y reset
     input wire i_rx,                    // Input data recived  

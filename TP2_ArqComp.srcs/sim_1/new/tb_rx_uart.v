@@ -19,7 +19,7 @@ module tb_rx_uart();
         clk = 0;
         rx = 1;  // RX inactiva
 
-        #50 reset = 0;  // Da de baja el reset
+        #40 reset = 0;  // Da de baja el reset
 
         // Bit de Inicio (104320 ns a 9600 baudios)
         #104320 rx = 0; 
