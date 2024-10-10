@@ -18,7 +18,7 @@ module baud_rate_generator#
     Para 9600 baudios, el contador debe ser 326.
     */
     localparam COUNTER = FREQ / (BAUD_RATE * SAMPLE_TIME);  // Cálculo del contador
-    localparam N_BITS_COUNTER = $clog2(COUNTER);                   // Bits necesarios para el contador
+    localparam N_BITS_COUNTER = $clog2(326);                   // Bits necesarios para el contador
 
     reg [N_BITS_COUNTER-1:0] r_counter;                            // Registro para el contador
 
