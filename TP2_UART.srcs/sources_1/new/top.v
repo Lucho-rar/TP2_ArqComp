@@ -44,6 +44,7 @@ tx_uart #(
     .i_reset(i_reset),
     .i_din(tx_din),
     .i_tx_start(tx_start),
+    .i_s_tick(tick),
     .o_tx_done_tick(tx_done_tick),
     .o_tx(tx_dout)
 );
@@ -78,6 +79,7 @@ interface #(
     .i_reset(i_reset),
     .i_rx_data(rx_dout),
     .i_alu_data(alu_out),
+    .i_rx_done(rx_done),
     .o_data_a(alu_a),
     .o_data_b(alu_b),
     .o_data_op(alu_op),
