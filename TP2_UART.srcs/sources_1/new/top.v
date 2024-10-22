@@ -5,12 +5,12 @@ module top
     parameter DBIT =  8,     //bits de datos
     parameter NB_OP = 6,         //bits de operacion 
     parameter SB_TICK = 16,     //ticks de la uart 
-    parameter FREQ = 50E6,                  
+    parameter FREQ = 100E6,                  
     parameter BAUD_RATE = 9600,              
     parameter SAMPLE_TIME = 16 
 )
 (
-    input wire i_clk, i_reset,          // Input clock y reset
+    input wire i_clk, i_reset,           // Input clock y reset
     input wire i_rx,
     
     output wire o_tx,
@@ -32,9 +32,21 @@ wire                    tick;           // generador [o_tick] -> tx_rx_uart [i_s
 // Conexion a las entradas / salidas del top (registros temporales)
 wire                    tx_done_tick;   // tx_uart [o_tx_done_tick] -> o_tx_done           
 wire [DBIT-1:0]      tx_dout;        // tx_uart [o_tx] -> o_tx       
+wire            clk_cw;
 
 assign o_tx_done = tx_done_tick;
 assign o_tx = tx_dout;
+
+/**clk_wiz_1 instance_name
+   (
+    // Clock out ports
+    .clk_out1(clk_cw),     //  conectar a todas las interfaces el clk_cw
+    // Status and control signals
+    .reset(i_reset), // input reset
+    .locked(locked),       // output locked
+   // Clock in ports
+    .clk_in1(i_clk)      // input clk_in1
+);**/
 
 tx_uart #(
     .DBIT(DBIT),
