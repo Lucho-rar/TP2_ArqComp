@@ -5,7 +5,7 @@ module top
     parameter DBIT =  8,     //bits de datos
     parameter NB_OP = 6,         //bits de operacion 
     parameter SB_TICK = 16,     //ticks de la uart 
-    parameter FREQ = 100E6,                  
+    parameter FREQ = 50E6,                  
     parameter BAUD_RATE = 9600,              
     parameter SAMPLE_TIME = 16 
 )
@@ -47,12 +47,22 @@ assign o_tx = tx_dout;
    // Clock in ports
     .clk_in1(i_clk)      // input clk_in1
 );**/
+clk_wiz_0 instance_name
+   (
+    // Clock out ports
+    .clk_out1(clk_w),     // output clk_out1
+    // Status and control signals
+    .reset(i_reset), // input reset
+    .locked(locked),       // output locked
+   // Clock in ports
+    .clk_in1(i_clk)      // input clk_in1
+);
 
 tx_uart #(
     .DBIT(DBIT),
     .SB_TICK(SB_TICK)
 ) u_mod_tx_uart(
-    .i_clk(i_clk),
+    .i_clk(clk_w),
     .i_reset(i_reset),
     .i_din(tx_din),
     .i_tx_start(tx_start),
@@ -65,7 +75,7 @@ rx_uart #(
     .DBIT(DBIT),
     .SB_TICK(SB_TICK)
 ) u_mod_rx_uart(
-    .i_clk(i_clk),
+    .i_clk(clk_w),
     .i_reset(i_reset),
     .i_rx(i_rx),        // Nombre rare
     .i_s_tick(tick),
@@ -78,7 +88,7 @@ baud_rate_generator #(
     .BAUD_RATE(BAUD_RATE),
     .SAMPLE_TIME(SAMPLE_TIME)
 ) u_mod_baud_rate_generator(
-    .i_clk(i_clk),
+    .i_clk(clk_w),
     .i_reset(i_reset),
     .o_tick(tick)
 );
@@ -87,7 +97,7 @@ interface #(
     .DBIT(DBIT),
     .NB_OP(NB_OP)
 ) u_mod_interface(
-    .i_clk(i_clk),
+    .i_clk(clk_w),
     .i_reset(i_reset),
     .i_rx_data(rx_dout),
     .i_alu_data(alu_out),

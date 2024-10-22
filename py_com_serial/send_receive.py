@@ -11,12 +11,12 @@ try:
 
         print("Ingrese el operando B: ")
         basura = int(input())           ## lo dejo pa stoppear
-        mensaje = 0b00000100
+        mensaje = 0b00001000
         ser.write(bytes([mensaje]))
 
         print("Ingrese el codigo de operacion: ")
         basura = int(input())
-        mensaje = 0b00100010
+        mensaje = 0b00100000
         ser.write(bytes([mensaje]))
         
         respuesta_bytes = ser.read(1)  # Lee un byte

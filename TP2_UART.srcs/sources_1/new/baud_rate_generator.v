@@ -2,7 +2,7 @@
 
 module baud_rate_generator#
 (
-    parameter FREQ = 100E6,                  // Frecuencia de reloj (creo que por recomendacion eran 50Mhz) ToDo: Verificar
+    parameter FREQ = 50E6,                  // Frecuencia de reloj (creo que por recomendacion eran 50Mhz) ToDo: Verificar
     parameter BAUD_RATE = 9600,              // Tasa de transferencia define cómo de rápido son transmitidos los datos en una línea serie, bits por sec o baudios
                                                 // Baud_rate comunes: 2400, 4800, 9600 y 19,200 
     parameter SAMPLE_TIME = 16              // Número de veces que se muestrea el bit
@@ -18,7 +18,7 @@ module baud_rate_generator#
     Para 9600 baudios, el contador debe ser 326.
     */
     localparam COUNTER = FREQ / (BAUD_RATE * SAMPLE_TIME);  // Cálculo del contador
-    localparam N_BITS_COUNTER = $clog2(651);                   // Bits necesarios para el contador
+    localparam N_BITS_COUNTER = $clog2(326);                   // Bits necesarios para el contador
 
     reg [N_BITS_COUNTER-1:0] r_counter;                            // Registro para el contador
 
