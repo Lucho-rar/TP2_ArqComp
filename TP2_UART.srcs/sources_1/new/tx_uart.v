@@ -53,15 +53,15 @@ module tx_uart
         
         case(state_reg)
             IDLE: begin
-                tx_next = 1'b1;    // mantengo el tx en uno porque no envio datos 
+                tx_next = 1'b1;                 // mantengo el tx en uno porque no envio datos 
                 if (i_tx_start) begin           // si viene el init pasamos de estado
                     s_next = 0;             
                     state_next = START;
-                    b_next = i_din;             //  byte que se va a transmitir 
+                    b_next = i_din;             // byte que se va a transmitir 
                 end
             end
             START: begin
-                tx_next = 1'b0;         //tx cero
+                tx_next = 1'b0;                 // tx cero
                 if (i_s_tick) begin 
                     if (s_reg == 15) begin      // el tx cuenta hasta 15 ticks
                         state_next = DATA;      // si es el 15 paso de estado 
@@ -74,16 +74,16 @@ module tx_uart
                 end
             end
             DATA: begin
-                tx_next = b_reg[0];     // bit 0 
+                tx_next = b_reg[0];             // bit 0 
                 if (i_s_tick) begin
-                    if (s_reg == 15) begin      //si es el ultimo tick vamos al siguiente bit
+                    if (s_reg == 15) begin      // si es el ultimo tick vamos al siguiente bit
                         s_next = 0;
                         b_next = b_reg >> 1;
-                        if (n_reg == (DBIT-1)) begin        //si aparte ya se alcanzo el tamano del byte cambiamos de estado
+                        if (n_reg == (DBIT-1)) begin    // si aparte ya se alcanzo el tamano del byte cambiamos de estado
                             state_next = STOP;
                         end
                         else begin
-                            n_next = n_reg + 1;     // sino sigo sumando tanto el contador de bits como el de ticks
+                            n_next = n_reg + 1;         // si no sigo sumando tanto el contador de bits como el de ticks
                         end
                     end
                     else begin

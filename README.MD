@@ -25,14 +25,6 @@ del trabajo son los siguientes:
   <em>Fig. Arquitectura</em>
 </p>
 
-
-## Implementacion física
-
-<p align="center">
-  <br><img src="./img/implementacion_f.png"><br>
-  <em>Fig. Implementación</em>
-</p>
-
 ## Desarrollo
 
 ### Módulo ALU
@@ -136,27 +128,243 @@ Resumen de Operación: Cada bit recibido es validado en intervalos específicos,
 ### Módulo Interfaz
 
 <p align="center">
-  <br><img src="./img/interfaz-fsm.png"><br>
+  <br><img src="./img/intf_fsm.png"><br>
   <em>Fig. Máquina de estados</em>
 </p>
+
+```verilog
+module interface#(
+    parameter DBIT = 8,                 // Data bits
+    parameter NB_OP = 6                 // Operation bits
+)(
+    input wire i_clk, i_reset,          // Input clock y reset
+    input wire i_rx_done,               //  este es el done del receptor del modulo uart
+    input [DBIT-1:0] i_rx_data,         // este es el dato que sale del receptor del modulo uart
+    input [DBIT-1:0] i_alu_data,        // esta es la entrada de datos del modulo alu
+
+
+
+    //datos para la alu
+    output  [DBIT-1:0] o_data_a,        //dato A
+    output  [DBIT-1:0] o_data_b,        //dato B
+    output  [NB_OP-1:0] o_data_op,      //operacion
+
+    // datos de la interfaz a enviar a tx del modulo uart
+    output  o_tx_start,                 // start para conversion del modulo uart
+    output [DBIT-1:0] o_dout            //dato de salida del resultado de la operacion
+);
+```
+
+Este es el encabezado del módulo `interface`, que permite configurar el número de bits para los datos (`DBIT`) y para la operación (`NB_OP`). Este módulo actúa como una interfaz para recibir datos y comandos desde un receptor UART, procesarlos y luego enviar los resultados de la operación a un transmisor UART.
+
+```verilog
+// Parámetros de Estado
+localparam  [1:0] DATA_A = 2'b00;       // estado para recibir dato A
+localparam  [1:0] DATA_B = 2'b01;       // estado para recibir dato B
+localparam  [1:0] DATA_OP = 2'b10;      // estado para recibir operacion
+localparam  [1:0] RESPONSE = 2'b11;     // estado para enviar datos
+```
+
+Define los estados posibles para el módulo, que determinan si el módulo está esperando el dato A, dato B, la operación, o si está enviando el resultado de la operación.
+
+```verilog
+// Registros internos 
+reg [1:0] state_reg, state_next;            // Registros de estado
+reg [DBIT-1:0] data_a_reg, data_b_reg, data_a_next, data_b_next;// Registro de datos
+reg [NB_OP-1:0] data_op_reg, data_op_next;  // Registro de operacion
+reg [DBIT-1:0] data_out_reg, data_out_next; // Registro de salida de datos
+reg tx_start_reg, tx_start_next;            // Registro de salida de datos
+```
+
+Define los registros internos para almacenar los datos de entrada, la operación, el resultado, y el estado de transmisión UART, tanto en el ciclo actual como en el próximo.
+```verilog
+// Bloque always Sincrónico
+always @(posedge i_clk or posedge i_reset) begin
+    if (i_reset) begin
+        state_reg <= DATA_A;
+        data_a_reg <= 0;
+        data_b_reg <= 0;
+        data_op_reg <= 0;
+        data_out_reg <= 0;
+        tx_start_reg <= 0;
+    end
+    else begin
+        state_reg <= state_next;
+        data_a_reg <= data_a_next;
+        data_b_reg <= data_b_next;
+        data_op_reg <= data_op_next;
+        data_out_reg <= data_out_next;
+        tx_start_reg <= tx_start_next;
+    end
+end
+```
+
+Inicializa los registros en cero cuando se activa el reset y actualiza el estado y los datos en cada ciclo de reloj.
+
+```verilog
+// Lógica Combinacional para la Máquina de Estados
+always @(posedge i_clk or posedge i_reset) begin
+    if (i_reset) begin
+        state_reg <= DATA_A;
+        data_a_reg <= 0;
+        data_b_reg <= 0;
+        data_op_reg <= 0;
+        data_out_reg <= 0;
+        tx_start_reg <= 0;
+    end
+    else begin
+        state_reg <= state_next;
+        data_a_reg <= data_a_next;
+        data_b_reg <= data_b_next;
+        data_op_reg <= data_op_next;
+        data_out_reg <= data_out_next;
+        tx_start_reg <= tx_start_next;
+    end
+end
+```
+Este bloque implementa la lógica de la máquina de estados. Según el estado actual (state_reg), realiza las siguientes operaciones:
+
+- `DATA_A`: Espera a i_rx_done para recibir el dato A y luego pasa al estado DATA_B.
+- `DATA_B`: Espera a i_rx_done para recibir el dato B y luego pasa al estado DATA_OP.
+- `DATA_OP`: Espera a i_rx_done para recibir la operación y luego pasa al estado RESPONSE.
+- `RESPONSE`: Asigna el dato de salida (i_alu_data) al registro de salida, inicia la transmisión (tx_start_next), y vuelve al estado DATA_A.
+
+
+```verilog
+// Salidas Asignadas
+assign o_data_a = data_a_reg;
+assign o_data_b = data_b_reg;
+assign o_data_op = data_op_reg;
+assign o_dout = data_out_reg;
+assign o_tx_start = tx_start_reg;
+```
+
+Asigna los valores de los registros internos a las salidas del módulo.
 
 #### Interfaz - UART
 <p align="center">
   <br><img src="./img/intf_uart.png"><br>
-  <em>Fig. Implementación</em>
+  <em>Fig. Detalles Interfaz - UART</em>
 </p>
 
 #### Interfaz - ALU
 <p align="center">
   <br><img src="./img/intf_alu.png"><br>
-  <em>Fig. Implementación</em>
+  <em>Fig. Detalles Interfaz - ALU</em>
 </p>
 
 ### TOP
+Es el módulo encargado de interconectar los diferentes submódulos para implementar el sistema de comunicación serie UART con una ALU controlada mediante una interfaz. Permite que los datos recibidos a través de UART se envíen a la ALU, donde se realiza una operación específica. Luego, el resultado se devuelve a través de UART, controlado por las señales generadas en la interfaz, la cual asegura mediante una maquina de estados que los datos se carguen por etapas.
+
+Partes que conforman el TOP:
+- Parametros: `DBIT`, `NB_OP`, `SB_TICK`, `FREQ`, `BAUD_RATE`, `SAMPLE_TIME`
+- Entradas y Salidas:
+
+```verilog
+    input wire i_clk, i_reset,      // clock y reset
+    input wire i_rx,                // Entrada externa de RX
+    output wire o_tx,               // Salida externa de TX
+    output wire o_tx_done           // Salida externa de TX-DONE
+```
+- Señales internas:  `alu_a`, `alu_b`, `alu_out`, `alu_op`, y `rx_done`.
+- Instancia de `clk_wiz_0`.
+```verilog
+clk_wiz_0 instance_name
+   (
+    // Clock out ports
+    .clk_out1(clk_w),               // output clk_out1
+    // Status and control signals
+    .reset(i_reset),                // input reset
+    .locked(locked),                // output locked
+   // Clock in ports
+    .clk_in1(i_clk)                 // input clk_in1
+);
+```
+Genera una señal de reloj `clk_w` partiendo de la señal de entrada i_clk.
+- Instancia de los submodulos: `tx_uart`, `rx_uart`, `baud_rate_generator`, `interface`, `alu`
+#### Clock wizard
+
+<p align="center">
+  <br><img src="./img/c_wizard.png"><br>
+  <em>Fig. Configuración clock wizard</em>
+</p>
 
 ### Constraint y configuración de la placa
-### Pruebas
+
+<p align="center">
+  <br><img src="./img/nexys.png"><br>
+  <em>Fig. Nexys 4 DDR.</em>
+</p>
+
+<p align="center">
+  <br><img src="./img/ifaz.png"><br>
+  <em>Fig. Interfaz gráfica para transmitir los bits desde la PC a la placa</em>
+</p>
+
+
+```verilog
+## Clock signal
+set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
+create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clk}];
+
+##Switches
+
+set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { i_switch[0] }]; #IO_L24N_T3_RS0_15 Sch=sw[0]
+set_property -dict { PACKAGE_PIN L16   IOSTANDARD LVCMOS33 } [get_ports { i_switch[1] }]; #IO_L3N_T0_DQS_EMCCLK_14 Sch=sw[1]
+set_property -dict { PACKAGE_PIN M13   IOSTANDARD LVCMOS33 } [get_ports { i_switch[2] }]; #IO_L6N_T0_D08_VREF_14 Sch=sw[2]
+set_property -dict { PACKAGE_PIN R15   IOSTANDARD LVCMOS33 } [get_ports { i_switch[3] }]; #IO_L13N_T2_MRCC_14 Sch=sw[3]
+set_property -dict { PACKAGE_PIN R17   IOSTANDARD LVCMOS33 } [get_ports { i_switch[4] }]; #IO_L12N_T1_MRCC_14 Sch=sw[4]
+set_property -dict { PACKAGE_PIN T18   IOSTANDARD LVCMOS33 } [get_ports { i_switch[5] }]; #IO_L7N_T1_D10_14 Sch=sw[5]
+set_property -dict { PACKAGE_PIN U18   IOSTANDARD LVCMOS33 } [get_ports { i_switch[6] }]; #IO_L17N_T2_A13_D29_14 Sch=sw[6]
+set_property -dict { PACKAGE_PIN R13   IOSTANDARD LVCMOS33 } [get_ports { i_switch[7] }]; #IO_L5N_T0_D07_14 Sch=sw[7]
+
+## LEDs
+
+set_property -dict { PACKAGE_PIN H17   IOSTANDARD LVCMOS33 } [get_ports { o_leds[0] }]; #IO_L18P_T2_A24_15 Sch=led[0]
+set_property -dict { PACKAGE_PIN K15   IOSTANDARD LVCMOS33 } [get_ports { o_leds[1] }]; #IO_L24P_T3_RS1_15 Sch=led[1]
+set_property -dict { PACKAGE_PIN J13   IOSTANDARD LVCMOS33 } [get_ports { o_leds[2] }]; #IO_L17N_T2_A25_15 Sch=led[2]
+set_property -dict { PACKAGE_PIN N14   IOSTANDARD LVCMOS33 } [get_ports { o_leds[3] }]; #IO_L8P_T1_D11_14 Sch=led[3]
+set_property -dict { PACKAGE_PIN R18   IOSTANDARD LVCMOS33 } [get_ports { o_leds[4] }]; #IO_L7P_T1_D09_14 Sch=led[4]
+set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports { o_leds[5] }]; #IO_L18N_T2_A11_D27_14 Sch=led[5]
+set_property -dict { PACKAGE_PIN U17   IOSTANDARD LVCMOS33 } [get_ports { o_leds[6] }]; #IO_L17P_T2_A14_D30_14 Sch=led[6]
+set_property -dict { PACKAGE_PIN U16   IOSTANDARD LVCMOS33 } [get_ports { o_leds[7] }]; #IO_L18P_T2_A12_D28_14 Sch=led[7]
+
+##Buttons
+
+set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 } [get_ports { i_button[0] }]; #IO_L9P_T1_DQS_14 Sch=btnc
+set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports { i_button[1] }]; #IO_L4N_T0_D05_14 Sch=btnu
+set_property -dict { PACKAGE_PIN P17   IOSTANDARD LVCMOS33 } [get_ports { i_button[2] }]; #IO_L12P_T1_MRCC_14 Sch=btnl
+
+```
+### Pruebas y Test benchs
+
+<p align="center">
+  <br><img src="./img/tb_bdg.png"><br>
+  <em>Fig. TB Generador de Baudios</em>
+</p>
+<p align="center">
+  <br><img src="./img/tb_if.png"><br>
+  <em>Fig. TB Interfaz</em>
+</p>
+<p align="center">
+  <br><img src="./img/tb_rx.png"><br>
+  <em>Fig. TB UART Rx</em>
+</p>
+<p align="center">
+  <br><img src="./img/tb_tx.png"><br>
+  <em>Fig. TB UART TX</em>
+</p>
+<p align="center">
+  <br><img src="./img/tb_top.png"><br>
+  <em>Fig. TB TOP</em>
+</p>
+
 ## Conclusión
+Durante el desarrollo del trabajo práctico, se logró implementar y poner en funcionamiento un sistema de comunicación UART, uno de los protocolos más comunes y ampliamente utilizados en la industria tecnológica. Este sistema fue integrado para enviar información de entrada al módulo ALU desarrollado previamente, permitiendo a la ALU recibir parámetros de entrada y códigos de operación y generando un resultado el cual es visualizado en nuestra interfaz gráfica programada en Python.
+
+A lo largo de este proceso, aprendimos sobre el funcionamiento de una máquina de estados, en la cual se gestionaron y controlaron múltiples operaciones mediante el uso de variables y registros secundarios. Este enfoque facilitó la sincronización y gestión de las señales involucradas en la transmisión y recepción de datos, además de asegurar el correcto flujo de información entre los módulos.
+
+Asimismo, este proyecto brindó una experiencia práctica en la integración de componentes digitales a nivel de hardware, desarrollando habilidades en diseño modular y control de flujo mediante máquinas de estados. Esto, además de mejorar nuestra comprensión sobre comunicación serial, nos permitió afianzar conceptos fundamentales en diseño digital y programación de sistemas embebidos, habilidades esenciales para abordar futuros proyectos de sistemas complejos.
 
 ## Referencias
 [1] Pong P. Chu, FPGA Prototyping by Verilog Examples. Cleveland State University, 2008
