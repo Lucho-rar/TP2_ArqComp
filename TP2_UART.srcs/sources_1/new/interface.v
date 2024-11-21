@@ -19,7 +19,7 @@ module interface#(
 
     // datos de la interfaz a enviar a tx del modulo uart
     output  o_tx_start,                 // start para conversion del modulo uart
-    output [DBIT-1:0] o_dout            //dato de salida del resultado de la operacion
+    output signed [DBIT-1:0] o_dout            //dato de salida del resultado de la operacion
 );
 
     // estados

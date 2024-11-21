@@ -24,8 +24,8 @@ always@(*) begin
         6'b100100: r_alu_result = i_data_a & i_data_b;      //AND
         6'b100101: r_alu_result = i_data_a | i_data_b;      //OR
         6'b100110: r_alu_result = i_data_a ^ i_data_b;      //XOR
-        6'b000011: r_alu_result = i_data_a >>> i_data_b;    //SRL
-        6'b000010: r_alu_result = i_data_a >> i_data_b;     //SRA
+        6'b000011: r_alu_result = i_data_a >>> i_data_b;    //SRA
+        6'b000010: r_alu_result = i_data_a >> i_data_b;     //SRL
         6'b100111: r_alu_result = ~(i_data_a | i_data_b);   //NOR
         default: r_alu_result =  {NB_DATA{1'b0}};           //default
     endcase
